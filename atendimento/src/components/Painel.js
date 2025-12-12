@@ -1,12 +1,14 @@
 import React from 'react';
-import { ultimasChamadas } from '../utils/mockData';
+import { useAtendimento } from '../AtendimentoContext';
 
 function Painel() {
+  const { chamadas } = useAtendimento();
+
   return (
     <div>
       <h2>Painel de Chamadas</h2>
       <ul>
-        {ultimasChamadas.map((chamada, idx) => (
+        {chamadas.map((chamada, idx) => (
           <li key={idx}>
             Senha: {chamada.numero} - Guichê: {chamada.guiche} - Atendido em: {chamada.dataAtendimento}
           </li>

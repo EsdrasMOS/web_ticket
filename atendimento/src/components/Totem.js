@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { emitirSenha } from '../utils/mockData';
+import { useAtendimento } from '../AtendimentoContext';
 
 function Totem() {
   const [tipo, setTipo] = useState('SG');
   const [senhaEmitida, setSenhaEmitida] = useState(null);
+  const { handleEmitirSenha } = useAtendimento();
 
   const handleEmitir = () => {
-    const novaSenha = emitirSenha(tipo);
+    const novaSenha = handleEmitirSenha(tipo);
     setSenhaEmitida(novaSenha.numero);
   };
 
