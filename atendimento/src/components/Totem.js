@@ -7,8 +7,10 @@ function Totem() {
   const { handleEmitirSenha } = useAtendimento();
 
   const handleEmitir = () => {
+    console.log('Emitindo senha do tipo:', tipo);
     const novaSenha = handleEmitirSenha(tipo);
-    setSenhaEmitida(novaSenha.numero);
+    console.log('Nova senha gerada:', novaSenha);
+    if (novaSenha) setSenhaEmitida(novaSenha.numero);
   };
 
   return (

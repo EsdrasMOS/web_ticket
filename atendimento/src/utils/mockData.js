@@ -17,6 +17,7 @@ export const senhasEmitidas = [
   }
   
   export function emitirSenha(tipo) {
+    console.log('Emitindo senha tipo:', tipo, 'Sequências atuais:', senhasEmitidas.length);
     const hoje = new Date();
     const yy = hoje.getFullYear().toString().slice(-2);
     const mm = (hoje.getMonth() + 1).toString().padStart(2, '0');
@@ -26,19 +27,33 @@ export const senhasEmitidas = [
     const novaSenha = { id: senhasEmitidas.length + 1, numero, tipo, dataEmissao: hoje.toISOString(), status: 'espera' };
     senhasEmitidas.push(novaSenha);
     filaAtual.push(numero);
+    console.log('Nova senha:', novaSenha);
     return novaSenha;
   }
   
-  export function chamarProxima() {
-    if (filaAtual.length === 0) return null;
-    const proxima = filaAtual.shift();
-    const senha = senhasEmitidas.find(s => s.numero === proxima);
-    if (senha) {
-      senha.status = 'atendendo';
-      senha.dataAtendimento = new Date().toISOString();
-      senha.tm = calcularTM(senha.tipo);
-      ultimasChamadas.unshift({ numero: senha.numero, guiche: 1, dataAtendimento: senha.dataAtendimento }); 
-      if (ultimasChamadas.length > 5) ultimasChamadas.pop(); 
+export function chamarProxima() {
+  if (filaAtual.length === 0) return null;
+  let proxima = null;
+  const spDisponivel = filaAtual.find(s => senhasEmitidas.find(senha => senha.numero === s && senha.tipo === 'SP'));
+  if (spDisponivel) {
+    proxima = spDisponivel; 
+  } else {
+    const ultimaTipo = ultimasChamadas.length > 0 ? senhasEmitidas.find(s => s.numero === ultimasChamadas[0].numero)?.tipo : null;
+    if (ultimaTipo === 'SP' || ultimaTipo === 'SG') {
+      proxima = filaAtual.find(s => senhasEmitidas.find(senha => senha.numero === s && senha.tipo === 'SE'));
+    } else if (ultimaTipo === 'SE') {
+      proxima = filaAtual.find(s => senhasEmitidas.find(senha => senha.numero === s && senha.tipo === 'SG'));
     }
-    return senha;
+    if (!proxima) proxima = filaAtual[0];
   }
+  filaAtual.splice(filaAtual.indexOf(proxima), 1);
+  const senha = senhasEmitidas.find(s => s.numero === proxima);
+  if (senha) {
+    senha.status = 'atendendo';
+    senha.dataAtendimento = new Date().toISOString();
+    senha.tm = calcularTM(senha.tipo);
+    ultimasChamadas.unshift({ numero: senha.numero, guiche: 1, dataAtendimento: senha.dataAtendimento });
+    if (ultimasChamadas.length > 5) ultimasChamadas.pop();
+  }
+  return senha;
+}
